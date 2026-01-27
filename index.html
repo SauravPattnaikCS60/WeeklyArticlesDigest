@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WeeklyArticlesDigest</title>
+  <meta name="color-scheme" content="light dark" />
+
+  <style>
+    :root{
+      --bg:#0b0c10;
+      --panel:#11131a;
+      --panel2:#0f1117;
+      --text:#e7e9ee;
+      --muted:#a7afc0;
+      --border:rgba(255,255,255,.12);
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+      --maxw:1100px;
+      --accent:#7aa2ff;
+      --accent2:#66e3c4;
+      --danger:#ff6b6b;
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f6f7fb;
+        --panel:#ffffff;
+        --panel2:#f2f4fa;
+        --text:#121521;
+        --muted:#5c647a;
+        --border:rgba(18,21,33,.12);
+        --shadow:0 10px 25px rgba(20,25,40,.10);
+        --accent:#2f6bff;
+        --accent2:#0aa37f;
+        --danger:#d92d20;
+      }
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      background: radial-gradient(1200px 500px at 20% -10%, rgba(122,162,255,.22), transparent 55%),
+                  radial-gradient(900px 450px at 95% 0%, rgba(102,227,196,.18), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      font: 15px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    .wrap{
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 28px 18px 60px;
+    }
+
+    header{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding: 18px 18px 14px;
+      border:1px solid var(--border);
+      background: color-mix(in oklab, var(--panel) 80%, transparent);
+      border-radius: calc(var(--radius) + 6px);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+
+    h1{
+      margin:0;
+      font-size: 30px;
+      letter-spacing: .2px;
+      line-height:1.15;
+    }
+
+    .subtitle{
+      margin:0;
+      color:var(--muted);
+      font-size: 15px;
+    }
+
+    .disclaimer{
+      margin: 6px 0 0;
+      padding: 10px 12px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      background: color-mix(in oklab, var(--panel2) 80%, transparent);
+      font-size: 13px;
+    }
+
+    .topbar{
+      margin-top: 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tabs{
+      display:flex;
+      gap: 8px;
+      padding: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--panel2) 75%, transparent);
+      box-shadow: 0 8px 20px rgba(0,0,0,.10);
+    }
+
+    .tab{
+      appearance:none;
+      border:0;
+      cursor:pointer;
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 650;
+      letter-spacing: .2px;
+      transition: transform .05s ease, background .15s ease, color .15s ease;
+    }
+    .tab:hover{ transform: translateY(-1px); }
+    .tab.active{
+      color: var(--text);
+      background: color-mix(in oklab, var(--accent) 22%, transparent);
+      box-shadow: 0 10px 22px rgba(0,0,0,.16);
+    }
+
+    .search{
+      display:none;
+      align-items:center;
+      gap: 10px;
+      flex: 1;
+      min-width: 260px;
+      justify-content: flex-end;
+    }
+
+    .search input{
+      width: min(520px, 100%);
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--panel) 85%, transparent);
+      color: var(--text);
+      outline: none;
+    }
+    .search input::placeholder{ color: color-mix(in oklab, var(--muted) 80%, transparent); }
+    .search .hint{
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    main{
+      margin-top: 18px;
+      display:flex;
+      flex-direction:column;
+      gap: 22px;
+    }
+
+    section.category{
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--panel) 82%, transparent);
+      border-radius: calc(var(--radius) + 6px);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .category-header{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--panel2) 78%, transparent),
+        color-mix(in oklab, var(--panel) 86%, transparent)
+      );
+    }
+
+    .category-title{
+      margin:0;
+      font-size: 18px;
+      letter-spacing:.2px;
+    }
+
+    .category-meta{
+      margin:0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .cards{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    /* full-width cards */
+    .card{
+      width: 100%;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--panel2) 75%, transparent);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 22px rgba(0,0,0,.16);
+      padding: 14px 14px 12px;
+      transition: transform .08s ease, border-color .15s ease;
+    }
+    .card:hover{
+      transform: translateY(-1px);
+      border-color: color-mix(in oklab, var(--accent) 35%, var(--border));
+    }
+
+    .card-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card h3{
+      margin:0;
+      font-size: 16px;
+      line-height:1.25;
+      letter-spacing:.1px;
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .date{
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    .summary{
+      margin: 10px 0 0;
+      color: color-mix(in oklab, var(--text) 88%, var(--muted));
+      font-size: 14px;
+    }
+
+    .actions{
+      margin-top: 10px;
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      justify-content:flex-start;
+      flex-wrap: wrap;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 9px 11px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--accent) 18%, transparent);
+      color: var(--text);
+      text-decoration:none;
+      font-weight: 650;
+      letter-spacing:.15px;
+    }
+    .btn:hover{
+      border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
+    }
+
+    .link{
+      color: var(--muted);
+      text-decoration:none;
+      border-bottom: 1px dashed color-mix(in oklab, var(--muted) 40%, transparent);
+      font-size: 13px;
+      max-width: 100%;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display:inline-block;
+    }
+    .link:hover{ color: var(--text); border-bottom-color: var(--accent); }
+
+    .empty, .error, .loading{
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: color-mix(in oklab, var(--panel) 75%, transparent);
+      color: var(--muted);
+      box-shadow: 0 10px 25px rgba(0,0,0,.12);
+    }
+    .error{ color: color-mix(in oklab, var(--danger) 85%, var(--text)); }
+    footer{
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align:center;
+    }
+
+    @media (max-width: 520px){
+      h1{ font-size: 26px; }
+      .card{ padding: 12px; }
+      .cards{ padding: 12px; }
+      .category-header{ padding: 14px 12px 10px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Weekly Articles Digest</h1>
+      <p class="subtitle">Bite-sized AI, Python &amp; Maths—so you learn something cool every week.</p>
+      <div class="disclaimer">
+        Disclaimer: Articles are fetched via each website’s RSS feed reader; links and summaries belong to their respective authors.
+      </div>
+
+      <div class="topbar">
+        <div class="tabs" role="tablist" aria-label="Digest tabs">
+          <button class="tab active" id="tab-current" role="tab" aria-selected="true" aria-controls="panel-current" type="button">
+            Current
+          </button>
+          <button class="tab" id="tab-archive" role="tab" aria-selected="false" aria-controls="panel-archive" type="button">
+            Archive
+          </button>
+        </div>
+
+        <div class="search" id="archive-search">
+          <span class="hint">Search (Archive):</span>
+          <input id="searchInput" type="search" placeholder="Type to filter by title / summary / date…" autocomplete="off" />
+        </div>
+      </div>
+    </header>
+
+    <main id="content">
+      <div class="loading" id="status">Loading…</div>
+    </main>
+  </div>
+
+  <script>
+    // Expected top-level keys (and display order)
+    const CATEGORY_ORDER = ["Core Python", "LLM", "Data Science", "Mathematics"];
+
+    // State
+    let activeTab = "current"; // "current" | "archive"
+    let archiveQuery = "";
+    let rawData = null;        // full JSON object loaded for the current tab
+
+    // Elements
+    const contentEl = document.getElementById("content");
+    const statusEl = document.getElementById("status");
+
+    const tabCurrent = document.getElementById("tab-current");
+    const tabArchive = document.getElementById("tab-archive");
+
+    const searchWrap = document.getElementById("archive-search");
+    const searchInput = document.getElementById("searchInput");
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function normalizeForSearch(s){
+      return String(s ?? "").toLowerCase();
+    }
+
+    function matchesQuery(article, query){
+      if(!query) return true;
+      const haystack = [
+        article.title,
+        article.summary,
+        article.date,
+        article.link
+      ].map(normalizeForSearch).join(" | ");
+      return haystack.includes(query);
+    }
+
+    function sortByDateDesc(items){
+      // If date is parseable, sort by it; otherwise keep stable-ish order.
+      // Accepts common formats; if invalid, Date.parse returns NaN.
+      return [...items].sort((a,b) => {
+        const ta = Date.parse(a?.date ?? "");
+        const tb = Date.parse(b?.date ?? "");
+        if (Number.isNaN(ta) && Number.isNaN(tb)) return 0;
+        if (Number.isNaN(ta)) return 1;
+        if (Number.isNaN(tb)) return -1;
+        return tb - ta;
+      });
+    }
+
+    function render(dataObj){
+      contentEl.innerHTML = ""; // clear
+
+      if(!dataObj || typeof dataObj !== "object"){
+        contentEl.innerHTML = `<div class="error">Invalid JSON structure. Expected an object keyed by category.</div>`;
+        return;
+      }
+
+      const query = activeTab === "archive" ? archiveQuery : "";
+      let totalShown = 0;
+
+      for(const cat of CATEGORY_ORDER){
+        const items = Array.isArray(dataObj[cat]) ? dataObj[cat] : [];
+        const filtered = items.filter(a => matchesQuery(a, query));
+        const sorted = sortByDateDesc(filtered);
+
+        totalShown += sorted.length;
+
+        const section = document.createElement("section");
+        section.className = "category";
+
+        const header = document.createElement("div");
+        header.className = "category-header";
+        header.innerHTML = `
+          <h2 class="category-title">${escapeHtml(cat)}</h2>
+          <p class="category-meta">${sorted.length} item${sorted.length === 1 ? "" : "s"}</p>
+        `;
+        section.appendChild(header);
+
+        const cards = document.createElement("div");
+        cards.className = "cards";
+
+        if(sorted.length === 0){
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = activeTab === "archive" && query
+            ? "No matches in this section for your search."
+            : "No articles found in this section.";
+          cards.appendChild(empty);
+        } else {
+          for(const a of sorted){
+            const title = a?.title ?? "Untitled";
+            const link  = a?.link ?? "";
+            const summary = a?.summary ?? "";
+            const date = a?.date ?? "";
+
+            const card = document.createElement("article");
+            card.className = "card";
+            card.innerHTML = `
+              <div class="card-top">
+                <h3>${escapeHtml(title)}</h3>
+                <div class="date">${escapeHtml(date)}</div>
+              </div>
+              ${summary ? `<p class="summary">${escapeHtml(summary)}</p>` : ""}
+              <div class="actions">
+                ${link ? `<a class="btn" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Read</a>` : ""}
+                ${link ? `<a class="link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link)}</a>` : ""}
+              </div>
+            `;
+            cards.appendChild(card);
+          }
+        }
+
+        section.appendChild(cards);
+        contentEl.appendChild(section);
+      }
+
+      if(activeTab === "archive" && archiveQuery && totalShown === 0){
+        const none = document.createElement("div");
+        none.className = "empty";
+        none.textContent = "No results across all sections. Try a different search term.";
+        contentEl.prepend(none);
+      }
+    }
+
+    async function loadJsonForTab(){
+      const file = activeTab === "current" ? "data/articles.json" : "data/archive.json";
+
+      contentEl.innerHTML = `<div class="loading">Loading <code>${file}</code>…</div>`;
+
+      try{
+        const res = await fetch(file, { cache: "no-store" });
+        if(!res.ok){
+          throw new Error(`Failed to fetch ${file} (${res.status})`);
+        }
+        const data = await res.json();
+        rawData = data;
+        render(rawData);
+      } catch(err){
+        rawData = null;
+        contentEl.innerHTML = `
+          <div class="error">
+            Could not load <code>${file}</code>.<br/>
+            ${escapeHtml(err?.message || String(err))}
+            <div style="margin-top:10px;color:var(--muted);">
+              Make sure <code>${file}</code> is in the same folder as <code>index.html</code>, and you are serving this over HTTP (e.g., GitHub Pages).
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function setActiveTab(tab){
+      activeTab = tab;
+
+      const isCurrent = tab === "current";
+      tabCurrent.classList.toggle("active", isCurrent);
+      tabArchive.classList.toggle("active", !isCurrent);
+
+      tabCurrent.setAttribute("aria-selected", String(isCurrent));
+      tabArchive.setAttribute("aria-selected", String(!isCurrent));
+
+      // show search only in archive
+      searchWrap.style.display = isCurrent ? "none" : "flex";
+      if(isCurrent){
+        archiveQuery = "";
+        if(searchInput) searchInput.value = "";
+      }
+
+      loadJsonForTab();
+    }
+
+    // Tab handlers
+    tabCurrent.addEventListener("click", () => setActiveTab("current"));
+    tabArchive.addEventListener("click", () => setActiveTab("archive"));
+
+    // Archive search handler
+    searchInput.addEventListener("input", (e) => {
+      archiveQuery = normalizeForSearch(e.target.value).trim();
+      if(rawData) render(rawData);
+    });
+
+    // Initial load
+    setActiveTab("current");
+  </script>
+</body>
+</html>
