@@ -7,10 +7,10 @@ import json
 
 def get_articles_feed():
     try:
-        if not os.path.exists('./data/archive/archive.json'):
+        if not os.path.exists('data/archive.json'):
             existing_file_json = None
         else:
-            existing_file_json = json.load(open('./data/archive/archive.json','r'))
+            existing_file_json = json.load(open('data/archive.json','r'))
         
         urls = get_urls()
         all_articles = {}
